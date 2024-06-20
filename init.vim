@@ -1,12 +1,6 @@
 " config file for neovim
 
 
-" ======= use other scripts =======
-
-" launch init.lua for plugins
-source ~/.config/nvim/scripts/init.lua
-
-
 " ======= Display settings =======
 
 
@@ -17,6 +11,9 @@ set termguicolors " bg color = #0b032e
 set number
 set cursorline
 
+hi Pmenu   guibg=#50438e 
+hi PmenuSel  guibg=#3026c7 gui=bold 
+hi PmenuSbar guibg=#b580ef 
 hi Normal guibg=none ctermbg=none
 hi LineNr guibg=#1b1633 guifg=#6c6781
 hi CursorLineNr cterm=bold guibg= guifg=#e6e5ea
@@ -24,6 +21,14 @@ hi CursorLine guibg=#231c42
 
 "hi _myCursor guibg=#ff0000 guifg=#00ffff 
 "set guicursor=n-v-c-sm:_myCursor,i-ci-ve:ver25,r-cr-o:hor20
+
+
+" ======= use other scripts =======
+
+" launch init.lua for plugins
+source ~/.config/nvim/scripts/init.lua
+
+
 
 
 " ======= Keybindings =======

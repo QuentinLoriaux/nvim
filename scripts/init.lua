@@ -14,11 +14,16 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+
+
 require("lazy").setup({
 	"alexghergh/nvim-tmux-navigation",
 	"github/copilot.vim",
 	"neovim/nvim-lspconfig",
+	"mfussenegger/nvim-dap",
 	"anuvyklack/hydra.nvim",
+	"nvim-treesitter/nvim-treesitter",
+	"nvim-treesitter/nvim-treesitter-textobjects",
 	{
    	 	'nvim-telescope/telescope.nvim', tag = '0.1.6',
      	 	dependencies = { 'nvim-lua/plenary.nvim', "nvim-treesitter/nvim-treesitter" }
@@ -28,11 +33,21 @@ require("lazy").setup({
     		"ThePrimeagen/harpoon",
     		branch = "harpoon2",
     		dependencies = { "nvim-lua/plenary.nvim"}
-	 }
+	 },
+	 {
+	       "folke/which-key.nvim",
+	       event = "VeryLazy",
+	       init = function()
+	         vim.o.timeout = true
+	         vim.o.timeoutlen = 300
+	       end,
+	       opts = {
+	         -- your configuration comes here
+	         -- or leave it empty to use the default settings
+	         -- refer to the configuration section below
+	       }
+         }
 })
-
-
-
 
 
 -- ======= tmux navigation config ========
@@ -105,6 +120,173 @@ vim.keymap.set('n', 'K', vim.lsp.buf.hover, { noremap = true, silent = true })
 
 require'lspconfig'.rust_analyzer.setup{}
 
+
+-- ====== Hydra config ========
+
+local Hydra = require("hydra")
+
+
+local ts_move = require'nvim-treesitter.textobjects.move'
+-- Move up/down functions
+Hydra({
+    hint = [[
+ _j_ _J_ : up
+ _k_ _K_ : down
+  _<Esc>_
+    ]],
+    config = {
+        timeout = 4000,
+        hint = {
+            border = 'rounded'
+        }
+    },
+    mode = {'n', 'x'},
+    body = '<leader>f',
+    heads = {
+        { 'j', function ()
+            ts_move.goto_next_start('@function.outer')
+            center_screen()
+        end },
+        { 'J', function ()
+            ts_move.goto_next_end('@function.outer')
+            center_screen()
+        end },
+        { 'k', function ()
+            ts_move.goto_previous_start('@function.outer')
+            center_screen()
+        end },
+        { 'K', function ()
+            ts_move.goto_previous_end('@function.outer')
+            center_screen()
+        end },
+        { '<Esc>', nil,  { exit = true }}
+    }
+})
+vim.keymap.set({'n', 'x'}, 'gj', function ()
+    ts_move.goto_next_start('@function.outer')
+    center_screen()
+    curr:activate()
+end)
+vim.keymap.set('o', 'gj', function () ts_move.goto_next_start('@function.outer') end)
+
+vim.keymap.set({'n', 'x'}, 'gk', function ()
+    ts_move.goto_previous_start('@function.outer')
+    center_screen()
+    curr:activate()
+end)
+vim.keymap.set('o', 'gk', function () ts_move.goto_previous_start('@function.outer') end)
+
+vim.keymap.set({'n', 'x'}, 'gJ', function ()
+    ts_move.goto_next_end('@function.outer')
+    center_screen()
+    curr:activate()
+end)
+vim.keymap.set('o', 'gJ', function () ts_move.goto_next_end('@function.outer') end)
+
+vim.keymap.set({'n', 'x'}, 'gK', function ()
+    ts_move.goto_previous_end('@function.outer')
+    center_screen()
+    curr:activate()
+end)
+vim.keymap.set('o', 'gK', function () ts_move.goto_previous_end('@function.outer') end)
+
+
+local hint = [[
+  ^ ^        Options
+  ^
+  _v_ %{ve} virtual edit
+  _i_ %{list} invisible characters  
+  _s_ %{spell} spell
+  _w_ %{wrap} wrap
+  _c_ %{cul} cursor line
+  _n_ %{nu} number
+  _r_ %{rnu} relative number
+  ^
+       ^^^^                _<Esc>_
+]]
+
+Hydra({
+   name = 'Options',
+   hint = hint,
+   config = {
+      color = 'amaranth',
+      invoke_on_body = true,
+      hint = {
+         border = 'rounded',
+         position = 'middle'
+      }
+   },
+   mode = {'n','x'},
+   body = '<leader>o',
+   heads = {
+      { 'n', function()
+         if vim.o.number == true then
+            vim.o.number = false
+         else
+            vim.o.number = true
+         end
+      end, { desc = 'number' } },
+      { 'r', function()
+         if vim.o.relativenumber == true then
+            vim.o.relativenumber = false
+         else
+            vim.o.number = true
+            vim.o.relativenumber = true
+         end
+      end, { desc = 'relativenumber' } },
+      { 'v', function()
+         if vim.o.virtualedit == 'all' then
+            vim.o.virtualedit = 'block'
+         else
+            vim.o.virtualedit = 'all'
+         end
+      end, { desc = 'virtualedit' } },
+      { 'i', function()
+         if vim.o.list == true then
+            vim.o.list = false
+         else
+            vim.o.list = true
+         end
+      end, { desc = 'show invisible' } },
+      { 's', function()
+         if vim.o.spell == true then
+            vim.o.spell = false
+         else
+            vim.o.spell = true
+         end
+      end, { exit = true, desc = 'spell' } },
+      { 'w', function()
+         if vim.o.wrap ~= true then
+            vim.o.wrap = true
+            -- Dealing with word wrap:
+            -- If cursor is inside very long line in the file than wraps
+            -- around several rows on the screen, then 'j' key moves you to
+            -- the next line in the file, but not to the next row on the
+            -- screen under your previous position as in other editors. These
+            -- bindings fixes this.
+            vim.keymap.set('n', 'k', function() return vim.v.count > 0 and 'k' or 'gk' end,
+                                     { expr = true, desc = 'k or gk' })
+            vim.keymap.set('n', 'j', function() return vim.v.count > 0 and 'j' or 'gj' end,
+                                     { expr = true, desc = 'j or gj' })
+         else
+            vim.o.wrap = false
+            vim.keymap.del('n', 'k')
+            vim.keymap.del('n', 'j')
+         end
+      end, { desc = 'wrap' } },
+      { 'c', function()
+         if vim.o.cursorline == true then
+            vim.o.cursorline = false
+         else
+            vim.o.cursorline = true
+         end
+      end, { desc = 'cursor line' } },
+      { '<Esc>', nil, { exit = true } }
+   }
+})
+
+
+-- ############  Colorschemes  ############
 
 
 
