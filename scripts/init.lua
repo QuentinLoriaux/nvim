@@ -46,7 +46,11 @@ require("lazy").setup({
 	         -- or leave it empty to use the default settings
 	         -- refer to the configuration section below
 	       }
-         }
+         },
+	 "Shougo/deoplete.nvim",
+	 "lervag/vimtex",
+	 "SirVer/ultisnips",
+	 "honza/vim-snippets",
 })
 
 
@@ -119,7 +123,7 @@ vim.keymap.set('n', 'K', vim.lsp.buf.hover, { noremap = true, silent = true })
 
 
 require'lspconfig'.rust_analyzer.setup{}
-
+require'lspconfig'.pylsp.setup{}
 
 -- ====== Hydra config ========
 
