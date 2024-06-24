@@ -1,5 +1,4 @@
-" config file for neovim
-
+" Neovim configuration file
 
 " ============================================================ Display settings =======
 
@@ -8,14 +7,58 @@
 set termguicolors " bg color = #0b032e
 
 " Display colors and cursor stuff
-set relativenumber
+
+function! WinhlChange(higroup, hischeme)
+    let current_winhl = &winhl
+    let winhl_list = split(current_winhl, ',') 
+    let new_winhl = []
+    let found = 0
+
+    for entry in winhl_list
+        if entry =~# '\<' . a:higroup . ':'
+            let found = 1
+            call add(new_winhl, a:higroup . ':' . a:hischeme)
+        else
+            call add(new_winhl, entry)
+        endif
+    endfor
+    
+    if found == 0
+        call add(new_winhl, a:higroup . ':' . a:hischeme)
+    endif
+    let new_winhl_string = join(new_winhl, ',')
+    execute 'setlocal winhl=' . new_winhl_string
+endfunction
+
+
+
+
+hi LineInsert guibg=#0b032e guifg=#3c11ff
+hi LineNormal guibg=#1b1633 guifg=#6c6781
+hi winReadOnly guibg=#081701 ctermbg=none
+hi winOutFocus guibg=#000000 ctermbg=none
+hi winNormal guibg=none ctermbg=none
+
+set nu
+augroup numberBar
+    autocmd!
+    autocmd BufEnter,WinEnter,InsertLeave * setl rnu | :call WinhlChange('LineNr', 'LineNormal')
+    autocmd insertEnter  *  setl nornu | :call WinhlChange('LineNr', 'LineInsert')
+    autocmd WinLeave * setl nornu | :call WinhlChange('LineNr', 'LineNormal')
+augroup END
 set cursorline
+
+augroup winStates
+	autocmd!
+	autocmd WinEnter,BufEnter,FocusGained * :call WinhlChange('Normal', 'winNormal')
+	autocmd WinEnter,BufEnter,FocusGained * if &readonly | :call WinhlChange('Normal','winReadOnly') | endif
+	autocmd WinLeave,Bufleave,FocusLost * :call WinhlChange('Normal', 'winOutFocus')
+augroup END
 
 hi Pmenu   guibg=#50438e 
 hi PmenuSel  guibg=#3026c7 gui=bold 
 hi PmenuSbar guibg=#b580ef 
-hi Normal guibg=none ctermbg=none
-hi LineNr guibg=#1b1633 guifg=#6c6781
+
 hi CursorLineNr cterm=bold guibg= guifg=#e6e5ea
 hi CursorLine guibg=#231c42
 "hi _myCursor guibg=#ff0000 guifg=#00ffff 
@@ -39,12 +82,13 @@ inoremap jj <Esc>
 " Comfy shortcuts
 nnoremap <CR> O<Esc>
 nnoremap !h :noh<CR>
-
+nnoremap !n :set nu!<CR>
+nnoremap !r :set rnu!<CR>
 
 " easier buffer navigation
-nnoremap <Left> :bp<CR>
-nnoremap <Right> :bn<CR>
-
+noremap <Left> :bp<CR>
+noremap <Right> :bn<CR>
+noremap <C-B> :bd<CR>
 
 " easier window navigation
 nnoremap <C-w><C-j> <C-w>s
@@ -56,12 +100,13 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
-nnoremap <C-q> 5<C-w><
-nnoremap <C-d> 5<C-w>>
-nnoremap <C-s> 3<C-w>-
-nnoremap <C-z> 3<C-w>+
+nnoremap <C-Left> 5<C-w><
+nnoremap <C-Right> 5<C-w>>
+nnoremap <C-Down> 3<C-w>-
+nnoremap <C-Up> 3<C-w>+
 
-
+" easier vertical navigation with numbers
+" nnoremap 1 :1<CR>
 
 " easier macros
 noremap ² @
