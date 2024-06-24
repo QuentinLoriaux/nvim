@@ -2,6 +2,7 @@ alias python=python3
 alias rick="echo 'Never gonna let you down' && touch prout"
 alias t='tmux'
 alias pip="echo 'Surtout pas!!!'"
+alias vi='nvim'
 function c() {
     "$@" | xclip -selection clipboard
 }
