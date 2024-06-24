@@ -55,6 +55,7 @@ augroup winStates
 	autocmd WinLeave,Bufleave,FocusLost * :call WinhlChange('Normal', 'winOutFocus')
 augroup END
 
+hi Normal guibg=none ctermbg=none
 hi Pmenu   guibg=#50438e 
 hi PmenuSel  guibg=#3026c7 gui=bold 
 hi PmenuSbar guibg=#b580ef 
