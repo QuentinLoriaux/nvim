@@ -68,8 +68,10 @@ hi CursorLine guibg=#231c42
 
 " ============================================================ use other scripts =======
 
+let g:python3_host_prog = '~\AppData\Local\Programs\Python\Python312\python.exe'
+
 " launch init.lua for plugins
-source ~/.config/nvim/scripts/init.lua
+source ~\AppData\Local\nvim\scripts\init.lua
 
 " ============================================================ Keybindings =======
 
