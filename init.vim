@@ -5,7 +5,7 @@
 
 " allow change of colors
 set termguicolors " bg color = #0b032e
-
+colorscheme evening
 " Display colors and cursor stuff
 
 function! WinhlChange(higroup, hischeme)
