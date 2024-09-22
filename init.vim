@@ -80,6 +80,9 @@ map <Space> <Leader>
 " leave insert mode
 inoremap jj <Esc>
 
+" copy to clipboard
+vnoremap <C-c> "+y
+
 " Comfy shortcuts
 nnoremap <CR> O<Esc>
 nnoremap !h :noh<CR>
